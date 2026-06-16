@@ -74,7 +74,7 @@ export function MarkingEditor({ invitation }: { invitation: EditorInvitation }) 
 
   const [image, setImage] = useState<HTMLImageElement | null>(null);
   const [imageError, setImageError] = useState<string | null>(null);
-  const [sampleText, setSampleText] = useState("अनिता शर्मा (Anita)");
+  const [sampleText, setSampleText] = useState("Rojan Dahal");
   const [saving, setSaving] = useState(false);
 
   const [mark, setMark] = useState<Mark>({
@@ -220,7 +220,7 @@ export function MarkingEditor({ invitation }: { invitation: EditorInvitation }) 
         ) : (
           <div
             ref={stageRef}
-            className="bg-muted relative w-full overflow-hidden rounded-xl border select-none"
+            className="bg-muted ring-gold/30 relative w-full overflow-hidden rounded-xl shadow-sm shadow-foreground/[0.04] ring-1 select-none"
             style={{ aspectRatio: String(aspect) }}
           >
             {!image ? (
@@ -263,7 +263,8 @@ export function MarkingEditor({ invitation }: { invitation: EditorInvitation }) 
       </div>
 
       {/* Controls */}
-      <div className="flex flex-col gap-5">
+      <div className="bg-card ring-gold/20 shadow-sm shadow-foreground/[0.03] flex h-fit flex-col gap-5 rounded-xl p-5 ring-1 lg:sticky lg:top-20">
+        <p className="eyebrow text-primary">Mark &amp; style</p>
         <div className="flex flex-col gap-2">
           <Label htmlFor="sample">Preview text</Label>
           <textarea

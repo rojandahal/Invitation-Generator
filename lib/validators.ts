@@ -84,11 +84,16 @@ export const renameInvitationSchema = z.object({
   title: z.string().trim().min(1).max(160),
 });
 
-// Optional honorifics rendered around the name at generation time.
-export const saveNameAffixesSchema = z.object({
+export const nameLanguageEnum = z.enum(["en", "ne"]);
+
+// Generation language + optional bilingual honorifics rendered around the name.
+export const saveGenerateSettingsSchema = z.object({
   invitationId: z.string().min(1),
-  namePrefix: z.string().trim().max(40).default(""),
-  nameSuffix: z.string().trim().max(40).default(""),
+  nameLanguage: nameLanguageEnum.default("ne"),
+  namePrefixEn: z.string().trim().max(40).default(""),
+  namePrefixNe: z.string().trim().max(40).default(""),
+  nameSuffixEn: z.string().trim().max(40).default(""),
+  nameSuffixNe: z.string().trim().max(40).default(""),
 });
 
 export const deleteInvitationSchema = z.object({

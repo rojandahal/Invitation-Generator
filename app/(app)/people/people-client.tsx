@@ -105,8 +105,13 @@ export function PeopleClient({
     <div className="flex flex-col gap-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="font-heading text-2xl font-semibold">People</h1>
-          <p className="text-muted-foreground mt-1 text-sm">
+          <p className="eyebrow text-primary mb-2.5">
+            {people.length} {people.length === 1 ? "Contact" : "Contacts"}
+          </p>
+          <h1 className="font-heading text-3xl font-semibold tracking-tight">
+            People
+          </h1>
+          <p className="text-muted-foreground mt-1.5 text-sm">
             Your master contact list. Attach people to invitations from here or
             from an invitation’s People tab.
           </p>

@@ -29,8 +29,13 @@ export default async function AdminUsersPage() {
     <div className="flex flex-col gap-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="font-heading text-2xl font-semibold">Users</h1>
-          <p className="text-muted-foreground mt-1 text-sm">
+          <p className="eyebrow text-primary mb-2.5">
+            {rows.length} {rows.length === 1 ? "Account" : "Accounts"}
+          </p>
+          <h1 className="font-heading text-3xl font-semibold tracking-tight">
+            Users
+          </h1>
+          <p className="text-muted-foreground mt-1.5 text-sm">
             Create accounts, change roles, and enable or disable access.
           </p>
         </div>

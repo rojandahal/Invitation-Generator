@@ -62,8 +62,12 @@ model Invitation {
   align             String            @default("center") // left|center|right
   valign            String            @default("middle") // top|middle|bottom
   maxLines          Int               @default(2) // wrap the name into up to this many lines
-  namePrefix        String            @default("") // optional honorific BEFORE the name (e.g. श्री / Mr)
-  nameSuffix        String            @default("") // optional honorific AFTER the name (e.g. ज्यू)
+  // Generation language + optional bilingual honorifics placed around the name.
+  nameLanguage      String            @default("ne") // "en" | "ne" — which name/affix language to render
+  namePrefixEn      String            @default("") // honorific BEFORE the name, English (e.g. Mr)
+  namePrefixNe      String            @default("") // honorific BEFORE the name, Nepali (e.g. श्री)
+  nameSuffixEn      String            @default("") // honorific AFTER the name, English
+  nameSuffixNe      String            @default("") // honorific AFTER the name, Nepali (e.g. ज्यू)
   marked            Boolean           @default(false) // has the mark been placed/saved at least once
   guests            InvitationGuest[]
   createdAt         DateTime          @default(now())

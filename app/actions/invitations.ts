@@ -11,7 +11,7 @@ import {
   deleteInvitationSchema,
   renameInvitationSchema,
   saveMarkSchema,
-  saveNameAffixesSchema,
+  saveGenerateSettingsSchema,
 } from "@/lib/validators";
 import { fail, firstZodError, ok, type ActionResult } from "@/lib/action-result";
 
@@ -102,12 +102,12 @@ export async function saveMarkAction(input: unknown): Promise<ActionResult> {
   return ok();
 }
 
-export async function saveNameAffixesAction(
+export async function saveGenerateSettingsAction(
   input: unknown,
 ): Promise<ActionResult> {
   const user = await requireUser();
 
-  const parsed = saveNameAffixesSchema.safeParse(input);
+  const parsed = saveGenerateSettingsSchema.safeParse(input);
   if (!parsed.success) return fail(firstZodError(parsed.error));
 
   const owned = await findOwnedInvitation(user.id, parsed.data.invitationId);
@@ -116,8 +116,11 @@ export async function saveNameAffixesAction(
   await prisma.invitation.update({
     where: { id: owned.id },
     data: {
-      namePrefix: parsed.data.namePrefix,
-      nameSuffix: parsed.data.nameSuffix,
+      nameLanguage: parsed.data.nameLanguage,
+      namePrefixEn: parsed.data.namePrefixEn,
+      namePrefixNe: parsed.data.namePrefixNe,
+      nameSuffixEn: parsed.data.nameSuffixEn,
+      nameSuffixNe: parsed.data.nameSuffixNe,
     },
   });
 

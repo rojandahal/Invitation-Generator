@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import { requireUser } from "@/lib/session";
 import { prisma } from "@/lib/prisma";
-import { personDisplayName } from "@/lib/person";
+import { guestDefaultText, personDisplayName } from "@/lib/person";
 import {
   InvitationDetail,
   type DetailInvitation,
@@ -42,7 +42,12 @@ export default async function InvitationDetailPage({
     id: g.id,
     personId: g.personId,
     name: personDisplayName(g.person),
+    nameEnglish: g.person.nameEnglish,
+    nameNepali: g.person.nameNepali ?? "",
     invitationText: g.invitationText,
+    // The auto default; the client compares it live against invitationText to
+    // decide whether the guest is customized (renders verbatim) or language-driven.
+    defaultText: guestDefaultText(g.person),
     status: g.status,
     generatedPublicId: g.generatedPublicId,
   }));
@@ -69,8 +74,11 @@ export default async function InvitationDetailPage({
     align: invitation.align,
     valign: invitation.valign,
     maxLines: invitation.maxLines,
-    namePrefix: invitation.namePrefix,
-    nameSuffix: invitation.nameSuffix,
+    nameLanguage: invitation.nameLanguage as "en" | "ne",
+    namePrefixEn: invitation.namePrefixEn,
+    namePrefixNe: invitation.namePrefixNe,
+    nameSuffixEn: invitation.nameSuffixEn,
+    nameSuffixNe: invitation.nameSuffixNe,
   };
 
   return (

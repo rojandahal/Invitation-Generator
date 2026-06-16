@@ -9,7 +9,9 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-sans);
   --font-mono: var(--font-geist-mono);
-  --font-heading: var(--font-sans);
+  --font-heading: var(--font-playfair);
+  --color-gold: var(--gold);
+  --color-paper: var(--paper);
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -49,72 +51,80 @@
 }
 
 :root {
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
+  /* Brand palette derived from the logo: lavender/violet primary, deep
+     navy-violet ink, warm-gold ornament accent, soft cream-lavender surfaces. */
+  --background: oklch(0.976 0.008 300);
+  --foreground: oklch(0.26 0.035 278);
+  /* Cards are warm ivory "card stock" against the cool lilac field. */
+  --paper: oklch(0.981 0.013 91);
+  --card: oklch(0.981 0.013 91);
+  --card-foreground: oklch(0.26 0.035 278);
   --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
-  --radius: 0.625rem;
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
+  --popover-foreground: oklch(0.26 0.035 278);
+  --primary: oklch(0.54 0.16 293);
+  --primary-foreground: oklch(0.99 0.005 290);
+  --secondary: oklch(0.96 0.018 292);
+  --secondary-foreground: oklch(0.34 0.05 290);
+  --muted: oklch(0.966 0.012 292);
+  --muted-foreground: oklch(0.485 0.038 288);
+  --accent: oklch(0.95 0.026 292);
+  --accent-foreground: oklch(0.34 0.06 290);
+  --destructive: oklch(0.585 0.21 25);
+  --border: oklch(0.91 0.018 292);
+  --input: oklch(0.9 0.018 292);
+  --ring: oklch(0.62 0.14 292);
+  /* Antique gold — engraving hairlines + ornaments. Dark enough to read on ivory. */
+  --gold: oklch(0.68 0.073 77);
+  --chart-1: oklch(0.62 0.15 292);
+  --chart-2: oklch(0.7 0.12 320);
+  --chart-3: oklch(0.78 0.085 78);
+  --chart-4: oklch(0.55 0.13 263);
+  --chart-5: oklch(0.45 0.14 300);
+  --radius: 0.7rem;
+  --sidebar: oklch(0.985 0.008 300);
+  --sidebar-foreground: oklch(0.26 0.035 278);
+  --sidebar-primary: oklch(0.54 0.16 293);
+  --sidebar-primary-foreground: oklch(0.99 0.005 290);
+  --sidebar-accent: oklch(0.95 0.026 292);
+  --sidebar-accent-foreground: oklch(0.34 0.06 290);
+  --sidebar-border: oklch(0.91 0.018 292);
+  --sidebar-ring: oklch(0.62 0.14 292);
 }
 
 .dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
+  --background: oklch(0.2 0.022 285);
+  --foreground: oklch(0.96 0.012 300);
+  --paper: oklch(0.245 0.026 286);
+  --card: oklch(0.245 0.026 286);
+  --card-foreground: oklch(0.96 0.012 300);
+  --popover: oklch(0.24 0.026 286);
+  --popover-foreground: oklch(0.96 0.012 300);
+  --primary: oklch(0.74 0.13 293);
+  --primary-foreground: oklch(0.2 0.03 290);
+  --secondary: oklch(0.3 0.026 287);
+  --secondary-foreground: oklch(0.96 0.012 300);
+  --muted: oklch(0.29 0.022 286);
+  --muted-foreground: oklch(0.72 0.025 292);
+  --accent: oklch(0.32 0.034 290);
+  --accent-foreground: oklch(0.96 0.012 300);
+  --destructive: oklch(0.7 0.17 22);
+  --border: oklch(1 0 0 / 11%);
   --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
+  --ring: oklch(0.62 0.12 293);
+  --gold: oklch(0.8 0.09 80);
+  --chart-1: oklch(0.74 0.13 293);
+  --chart-2: oklch(0.72 0.12 320);
+  --chart-3: oklch(0.8 0.09 80);
+  --chart-4: oklch(0.65 0.13 263);
+  --chart-5: oklch(0.6 0.14 300);
+  --sidebar: oklch(0.24 0.026 286);
+  --sidebar-foreground: oklch(0.96 0.012 300);
+  --sidebar-primary: oklch(0.74 0.13 293);
+  --sidebar-primary-foreground: oklch(0.2 0.03 290);
+  --sidebar-accent: oklch(0.32 0.034 290);
+  --sidebar-accent-foreground: oklch(0.96 0.012 300);
+  --sidebar-border: oklch(1 0 0 / 11%);
+  --sidebar-ring: oklch(0.62 0.12 293);
 }
 
 @layer base {
@@ -123,9 +133,55 @@
   }
   body {
     @apply bg-background text-foreground;
+    /* Soft lavender glow from the top — subtle brand warmth, not a flat slab. */
+    background-image: radial-gradient(
+      48rem 32rem at 50% -14rem,
+      color-mix(in oklch, var(--primary) 12%, transparent),
+      transparent 70%
+    );
+    background-attachment: fixed;
+    background-repeat: no-repeat;
   }
   html {
     @apply font-sans;
+  }
+  /* Elegant display serif for headings; tighten the optical spacing a touch. */
+  .font-heading {
+    letter-spacing: -0.01em;
+  }
+  /* Interactive affordance: anything clickable gets a pointer cursor. */
+  button:not(:disabled),
+  [role="button"]:not([aria-disabled="true"]),
+  [role="tab"],
+  [role="option"],
+  [role="menuitem"],
+  [role="switch"],
+  summary,
+  select:not(:disabled),
+  [data-slot="checkbox"]:not([disabled]),
+  input[type="checkbox"]:not(:disabled),
+  input[type="radio"]:not(:disabled),
+  input[type="color"]:not(:disabled),
+  input[type="range"]:not(:disabled) {
+    cursor: pointer;
+  }
+  /* Brand text selection — a small, consistent flourish. */
+  ::selection {
+    background-color: color-mix(in oklch, var(--primary) 22%, transparent);
+    color: var(--foreground);
+  }
+}
+
+/* Honour reduced-motion: collapse the new card lifts, hovers, and animations to
+   near-instant so the UI never moves for people who asked it not to. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
   }
 }
 
@@ -134,4 +190,71 @@
    Devanagari for Devanagari glyphs — so BOTH scripts are legible and editable. */
 .font-name {
   font-family: var(--font-sans), var(--font-devanagari);
+}
+
+/* ── Stationery system ───────────────────────────────────────────────────
+   A small set of devices borrowed from engraved invitation cards: an editorial
+   eyebrow label, a gold ornament divider, and an inset keyline frame. Used
+   sparingly so they stay a signature, not noise. */
+
+@layer components {
+
+/* Eyebrow: uppercase, letter-spaced label for statuses, counts, section kickers.
+   Encodes real data; not decoration. Layered so a `text-gold`/`text-foreground`
+   utility override still wins. */
+.eyebrow {
+  font-family: var(--font-sans);
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  font-size: 0.6875rem;
+  line-height: 1;
+  font-weight: 600;
+  color: var(--muted-foreground);
+}
+
+/* Ornament: a centred flourish — two fading gold hairlines around a glyph.
+   Usage: <div class="ornament" aria-hidden="true">✦</div> */
+.ornament {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.7rem;
+  color: var(--gold);
+  font-size: 0.7rem;
+  line-height: 1;
+  user-select: none;
+}
+.ornament::before,
+.ornament::after {
+  content: "";
+  height: 1px;
+  width: clamp(2rem, 18%, 3.5rem);
+  background: linear-gradient(
+    to right,
+    transparent,
+    color-mix(in oklch, var(--gold) 75%, transparent)
+  );
+}
+.ornament::before {
+  background: linear-gradient(
+    to left,
+    transparent,
+    color-mix(in oklch, var(--gold) 75%, transparent)
+  );
+}
+
+/* Keyline: the engraved double-rule of an invitation card — a hairline gold
+   frame inset from the edge. Put on showcase cards (auth, empty states). */
+.u-keyline {
+  position: relative;
+}
+.u-keyline::after {
+  content: "";
+  position: absolute;
+  inset: 0.6rem;
+  border: 1px solid color-mix(in oklch, var(--gold) 42%, transparent);
+  border-radius: calc(var(--radius) - 0.25rem);
+  pointer-events: none;
+}
+
 }

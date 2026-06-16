@@ -5,7 +5,8 @@ import {
   InvitationCard,
   type InvitationCardData,
 } from "@/components/invitation-card";
-import { ImagePlus } from "lucide-react";
+import { Card } from "@/components/ui/card";
+import { MailPlus } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
@@ -46,30 +47,49 @@ export default async function DashboardPage() {
   }));
 
   return (
-    <div className="flex flex-col gap-6">
-      <div className="flex flex-wrap items-center justify-between gap-3">
+    <div className="flex flex-col gap-7">
+      <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h1 className="font-heading text-2xl font-semibold">Invitations</h1>
-          <p className="text-muted-foreground mt-1 text-sm">
+          <p className="eyebrow text-primary mb-2.5">
+            {cards.length === 0
+              ? "Your collection"
+              : `${cards.length} ${cards.length === 1 ? "Card" : "Cards"}`}
+          </p>
+          <h1 className="font-heading text-3xl font-semibold tracking-tight">
+            Invitations
+          </h1>
+          <p className="text-muted-foreground mt-1.5 text-sm">
             Upload a card, mark the name spot, then generate one per guest.
           </p>
         </div>
-        <CreateInvitationDialog />
+        {cards.length > 0 ? <CreateInvitationDialog /> : null}
       </div>
 
       {cards.length === 0 ? (
-        <div className="border-border/70 flex flex-col items-center justify-center gap-3 rounded-xl border border-dashed py-20 text-center">
-          <div className="bg-muted flex size-12 items-center justify-center rounded-full">
-            <ImagePlus className="text-muted-foreground size-6" />
+        <Card
+          keyline
+          className="mx-auto w-full max-w-md items-center gap-4 px-8 py-14 text-center"
+        >
+          <div aria-hidden className="ornament w-full">
+            ✦
           </div>
-          <div>
-            <p className="font-medium">No invitations yet</p>
-            <p className="text-muted-foreground text-sm">
-              Create your first invitation to get started.
+          <div className="bg-primary/10 text-primary ring-primary/20 flex size-14 items-center justify-center rounded-full ring-1">
+            <MailPlus className="size-7" />
+          </div>
+          <div className="space-y-1.5">
+            <h2 className="font-heading text-xl font-semibold">
+              Address your first invitation
+            </h2>
+            <p className="text-muted-foreground mx-auto max-w-xs text-sm text-pretty">
+              Upload a card design, mark where the name belongs, and we&apos;ll
+              set one for every guest on your list.
             </p>
           </div>
           <CreateInvitationDialog />
-        </div>
+          <div aria-hidden className="ornament w-full">
+            ✦
+          </div>
+        </Card>
       ) : (
         <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {cards.map((card) => (

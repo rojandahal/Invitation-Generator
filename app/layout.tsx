@@ -64,9 +64,12 @@ const mukta = Mukta({
 });
 
 export const metadata: Metadata = {
-  title: "Invitation Generator",
+  title: {
+    default: "Invitation Generation",
+    template: "%s · Invitation Generation",
+  },
   description:
-    "Create personalised invitation cards in bulk — mark a name spot, manage your guest list, and generate one image per guest.",
+    "Generate beautiful invitations with names — mark a name spot, manage your guest list in English or Nepali, and create one personalised card per guest.",
 };
 
 export default function RootLayout({

@@ -39,7 +39,7 @@ import {
   resetGeneratedAction,
   saveGeneratedAction,
 } from "@/app/actions/generate";
-import { saveNameAffixesAction } from "@/app/actions/invitations";
+import { saveGenerateSettingsAction } from "@/app/actions/invitations";
 import { AddPeopleDialog } from "./add-people-dialog";
 
 import { Button } from "@/components/ui/button";
@@ -75,7 +75,13 @@ export type GuestRow = {
   id: string;
   personId: string;
   name: string;
+  nameEnglish: string;
+  nameNepali: string;
   invitationText: string;
+  // The auto-generated default text. When invitationText differs from this the
+  // guest is "customized" and renders verbatim (ignoring language/honorifics).
+  // Kept as data (not a snapshot flag) so the check stays live as the user edits.
+  defaultText: string;
   status: "UNINVITED" | "GENERATED";
   generatedPublicId: string | null;
 };
@@ -102,19 +108,53 @@ export type DetailInvitation = {
   align: string;
   valign: string;
   maxLines: number;
-  namePrefix: string;
-  nameSuffix: string;
+  nameLanguage: "en" | "ne";
+  namePrefixEn: string;
+  namePrefixNe: string;
+  nameSuffixEn: string;
+  nameSuffixNe: string;
 };
 
 const RENDER_WIDTH = 2000;
 const CONCURRENCY = 5;
 
-/** Wrap the per-guest text with the optional honorifics, e.g. "श्री रोजन ज्यू". */
-function composeText(prefix: string, text: string, suffix: string): string {
-  return [prefix, text, suffix]
-    .map((s) => s.trim())
-    .filter(Boolean)
-    .join(" ");
+type Language = "en" | "ne";
+
+/** What the user picks in the Generate dialog for one generation run. */
+type GenSettings = {
+  language: Language;
+  prefixEn: string;
+  prefixNe: string;
+  suffixEn: string;
+  suffixNe: string;
+};
+
+/** The guest's name in the chosen language (Nepali falls back to English). */
+function guestName(row: GuestRow, language: Language): string {
+  if (language === "en") return row.nameEnglish.trim();
+  return row.nameNepali.trim() || row.nameEnglish.trim();
+}
+
+/**
+ * Whether the guest's text was hand-edited away from the auto default. Derived
+ * live (not a stored flag) so it stays correct the instant the user edits the
+ * text — otherwise a freshly saved multiline override would be ignored until a
+ * full page refresh.
+ */
+function isCustomized(row: GuestRow): boolean {
+  return row.invitationText.trim() !== row.defaultText.trim();
+}
+
+/**
+ * The exact text printed for a guest: a hand-edited override is used verbatim
+ * (preserving any line breaks); otherwise it's [prefix] [name] [suffix] in the
+ * selected language, e.g. "श्री रोजन ज्यू" or "Mr Rojan".
+ */
+function composeForGen(row: GuestRow, s: GenSettings): string {
+  if (isCustomized(row)) return row.invitationText.trim();
+  const prefix = (s.language === "en" ? s.prefixEn : s.prefixNe).trim();
+  const suffix = (s.language === "en" ? s.suffixEn : s.suffixNe).trim();
+  return [prefix, guestName(row, s.language), suffix].filter(Boolean).join(" ");
 }
 
 export function InvitationDetail({
@@ -249,11 +289,7 @@ export function InvitationDetail({
     return canvasToJpegBlob(canvas, 0.9);
   }
 
-  async function generateRows(
-    targets: GuestRow[],
-    prefix: string,
-    suffix: string,
-  ) {
+  async function generateRows(targets: GuestRow[], settings: GenSettings) {
     if (!invitation.marked) {
       toast.error("Mark the name spot before generating.");
       return;
@@ -273,10 +309,7 @@ export function InvitationDetail({
     const { errors } = await runPool(
       targets,
       async (row) => {
-        const blob = await renderRowToBlob(
-          image,
-          composeText(prefix, row.invitationText, suffix),
-        );
+        const blob = await renderRowToBlob(image, composeForGen(row, settings));
         const uploaded = await uploadToCloudinary(blob, "generated", {
           filename: `${sanitizeFilename(row.name)}.jpg`,
         });
@@ -327,16 +360,19 @@ export function InvitationDetail({
     requestGenerate(rows.filter((r) => selected.has(r.id)));
   }
 
-  async function confirmGenerate(prefix: string, suffix: string) {
+  async function confirmGenerate(settings: GenSettings) {
     const targets = genTargets ?? [];
     setGenTargets(null);
-    // Remember the honorifics on the invitation so they pre-fill next time.
-    await saveNameAffixesAction({
+    // Remember the language + honorifics so they pre-fill next time.
+    await saveGenerateSettingsAction({
       invitationId: invitation.id,
-      namePrefix: prefix,
-      nameSuffix: suffix,
+      nameLanguage: settings.language,
+      namePrefixEn: settings.prefixEn,
+      namePrefixNe: settings.prefixNe,
+      nameSuffixEn: settings.suffixEn,
+      nameSuffixNe: settings.suffixNe,
     }).catch(() => {});
-    await generateRows(targets, prefix, suffix);
+    await generateRows(targets, settings);
   }
 
   // ---- downloads ---------------------------------------------------------
@@ -437,7 +473,7 @@ export function InvitationDetail({
   const renderGuestTable = (list: GuestRow[], emptyLabel: string) => {
     const allSelected = list.length > 0 && list.every((r) => selected.has(r.id));
     return (
-      <div className="rounded-xl border">
+      <div className="bg-card ring-gold/20 shadow-sm shadow-foreground/[0.03] overflow-hidden rounded-xl px-2 ring-1">
         <Table>
           <TableHeader>
             <TableRow>
@@ -576,38 +612,55 @@ export function InvitationDetail({
   return (
     <div className="flex flex-col gap-6">
       {/* header */}
-      <div className="flex flex-col gap-2">
-        <Link
-          href="/dashboard"
-          className="text-muted-foreground hover:text-foreground inline-flex w-fit items-center gap-1 text-sm"
-        >
-          <ArrowLeft className="size-3.5" />
-          All invitations
-        </Link>
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <div>
-            <h1 className="font-heading text-2xl font-semibold">
+      <div className="flex flex-col gap-4">
+        <div className="flex flex-col gap-3">
+          <Link
+            href="/dashboard"
+            className="text-muted-foreground hover:text-foreground inline-flex w-fit items-center gap-1 text-sm"
+          >
+            <ArrowLeft className="size-3.5" />
+            All invitations
+          </Link>
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <h1 className="font-heading max-w-xl text-3xl font-semibold tracking-tight text-balance">
               {invitation.title}
             </h1>
-            <p className="text-muted-foreground mt-1 text-sm">
-              {counts.total} guest{counts.total === 1 ? "" : "s"} ·{" "}
-              {counts.generated} generated · {counts.uninvited} pending
-            </p>
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                nativeButton={false}
+                render={<Link href={`/dashboard/${invitation.id}/mark`} />}
+              >
+                <PenLine />
+                {invitation.marked ? "Edit mark" : "Mark name spot"}
+              </Button>
+              <Button onClick={() => setAddOpen(true)}>
+                <UserPlus />
+                Add people
+              </Button>
+            </div>
           </div>
-          <div className="flex gap-2">
-            <Button
-              variant="outline"
-              nativeButton={false}
-              render={<Link href={`/dashboard/${invitation.id}/mark`} />}
-            >
-              <PenLine />
-              {invitation.marked ? "Edit mark" : "Mark name spot"}
-            </Button>
-            <Button onClick={() => setAddOpen(true)}>
-              <UserPlus />
-              Add people
-            </Button>
-          </div>
+        </div>
+
+        {/* stat strip — the counts as an editorial ledger */}
+        <div className="flex items-center gap-5">
+          {[
+            { n: counts.total, label: counts.total === 1 ? "Guest" : "Guests" },
+            { n: counts.generated, label: "Generated" },
+            { n: counts.uninvited, label: "Pending" },
+          ].map((s, i) => (
+            <div key={s.label} className="flex items-center gap-5">
+              {i > 0 ? (
+                <span aria-hidden className="bg-gold/30 h-7 w-px" />
+              ) : null}
+              <div>
+                <div className="font-heading text-foreground text-lg leading-none font-semibold tabular-nums">
+                  {s.n}
+                </div>
+                <div className="eyebrow mt-1.5">{s.label}</div>
+              </div>
+            </div>
+          ))}
         </div>
       </div>
 
@@ -673,7 +726,7 @@ export function InvitationDetail({
 
       {/* tabs */}
       <Tabs value={tab} onValueChange={setTab}>
-        <TabsList>
+        <TabsList variant="line" className="mb-1 gap-4">
           <TabsTrigger value="guests">Pending ({counts.uninvited})</TabsTrigger>
           <TabsTrigger value="generated">
             Generated ({counts.generated})
@@ -713,8 +766,11 @@ export function InvitationDetail({
 
       <GenerateDialog
         targets={genTargets}
-        defaultPrefix={invitation.namePrefix}
-        defaultSuffix={invitation.nameSuffix}
+        defaultLanguage={invitation.nameLanguage}
+        defaultPrefixEn={invitation.namePrefixEn}
+        defaultPrefixNe={invitation.namePrefixNe}
+        defaultSuffixEn={invitation.nameSuffixEn}
+        defaultSuffixNe={invitation.nameSuffixNe}
         onClose={() => setGenTargets(null)}
         onConfirm={confirmGenerate}
       />
@@ -864,41 +920,69 @@ function EditTextDialog({
 }
 
 /**
- * Asks for the optional honorifics to place before/after each name, then kicks
- * off generation. Both fields are optional; the preview shows the exact text
- * that will be printed, e.g. "श्री रोजन ज्यू" or "Mr Rojan Dahal".
+ * Picks the generation language and the optional honorifics around each name,
+ * then kicks off generation. The whole text renders in the chosen language:
+ * the name comes from each guest's English or Nepali name, and the honorifics
+ * use that language's values. The preview shows the exact text for the first
+ * target, e.g. "श्री रोजन ज्यू" or "Mr Rojan".
  */
 function GenerateDialog({
   targets,
-  defaultPrefix,
-  defaultSuffix,
+  defaultLanguage,
+  defaultPrefixEn,
+  defaultPrefixNe,
+  defaultSuffixEn,
+  defaultSuffixNe,
   onClose,
   onConfirm,
 }: {
   targets: GuestRow[] | null;
-  defaultPrefix: string;
-  defaultSuffix: string;
+  defaultLanguage: Language;
+  defaultPrefixEn: string;
+  defaultPrefixNe: string;
+  defaultSuffixEn: string;
+  defaultSuffixNe: string;
   onClose: () => void;
-  onConfirm: (prefix: string, suffix: string) => void;
+  onConfirm: (settings: GenSettings) => void;
 }) {
-  const [prefix, setPrefix] = useState(defaultPrefix);
-  const [suffix, setSuffix] = useState(defaultSuffix);
+  const [language, setLanguage] = useState<Language>(defaultLanguage);
+  const [prefixEn, setPrefixEn] = useState(defaultPrefixEn);
+  const [prefixNe, setPrefixNe] = useState(defaultPrefixNe);
+  const [suffixEn, setSuffixEn] = useState(defaultSuffixEn);
+  const [suffixNe, setSuffixNe] = useState(defaultSuffixNe);
 
   useEffect(() => {
-    // Re-seed from the saved honorifics each time the dialog opens.
+    // Re-seed from the saved settings each time the dialog opens.
     if (!targets) return;
     // eslint-disable-next-line react-hooks/set-state-in-effect
-    setPrefix(defaultPrefix);
-    setSuffix(defaultSuffix);
-  }, [targets, defaultPrefix, defaultSuffix]);
+    setLanguage(defaultLanguage);
+    setPrefixEn(defaultPrefixEn);
+    setPrefixNe(defaultPrefixNe);
+    setSuffixEn(defaultSuffixEn);
+    setSuffixNe(defaultSuffixNe);
+  }, [
+    targets,
+    defaultLanguage,
+    defaultPrefixEn,
+    defaultPrefixNe,
+    defaultSuffixEn,
+    defaultSuffixNe,
+  ]);
 
+  const settings: GenSettings = { language, prefixEn, prefixNe, suffixEn, suffixNe };
   const count = targets?.length ?? 0;
-  const sampleName = targets?.[0]?.invitationText?.trim() || "नाम";
-  const preview = composeText(prefix, sampleName, suffix);
+  const first = targets?.[0];
+  const preview = first ? composeForGen(first, settings) : "";
+
+  // The prefix/suffix inputs edit whichever language is selected.
+  const activePrefix = language === "en" ? prefixEn : prefixNe;
+  const activeSuffix = language === "en" ? suffixEn : suffixNe;
+  const setActivePrefix = language === "en" ? setPrefixEn : setPrefixNe;
+  const setActiveSuffix = language === "en" ? setSuffixEn : setSuffixNe;
 
   function submit(e: React.FormEvent) {
     e.preventDefault();
-    onConfirm(prefix.trim(), suffix.trim());
+    onConfirm(settings);
   }
 
   return (
@@ -907,41 +991,69 @@ function GenerateDialog({
         <DialogHeader>
           <DialogTitle>Generate {count} invitation{count === 1 ? "" : "s"}</DialogTitle>
           <DialogDescription>
-            Optionally add an honorific before and after each name. Leave blank to
-            print just the name.
+            Pick the language and optional honorifics. Names come from each
+            guest&apos;s English or Nepali name; the honorifics use the same
+            language.
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={submit} className="flex flex-col gap-4">
+          <div className="flex flex-col gap-2">
+            <Label>Language</Label>
+            <div className="grid grid-cols-2 gap-1">
+              <Button
+                type="button"
+                variant={language === "en" ? "default" : "outline"}
+                onClick={() => setLanguage("en")}
+              >
+                English
+              </Button>
+              <Button
+                type="button"
+                variant={language === "ne" ? "default" : "outline"}
+                className="font-name"
+                onClick={() => setLanguage("ne")}
+              >
+                नेपाली
+              </Button>
+            </div>
+          </div>
+
           <div className="grid grid-cols-2 gap-3">
             <div className="flex flex-col gap-2">
               <Label htmlFor="gen-prefix">Before the name</Label>
               <Input
                 id="gen-prefix"
-                value={prefix}
-                onChange={(e) => setPrefix(e.target.value)}
-                placeholder="श्री / Mr"
+                value={activePrefix}
+                onChange={(e) => setActivePrefix(e.target.value)}
+                placeholder={language === "en" ? "Mr" : "श्री"}
                 className="font-name"
-                autoFocus
               />
             </div>
             <div className="flex flex-col gap-2">
               <Label htmlFor="gen-suffix">After the name</Label>
               <Input
                 id="gen-suffix"
-                value={suffix}
-                onChange={(e) => setSuffix(e.target.value)}
-                placeholder="ज्यू / Jyu"
+                value={activeSuffix}
+                onChange={(e) => setActiveSuffix(e.target.value)}
+                placeholder={language === "en" ? "Jr" : "ज्यू"}
                 className="font-name"
               />
             </div>
           </div>
 
           <div className="flex flex-col gap-1">
-            <span className="text-muted-foreground text-xs">Preview</span>
-            <div className="font-name bg-muted/50 rounded-lg border px-3 py-2 text-center text-base">
+            <span className="text-muted-foreground text-xs">
+              Preview ({language === "en" ? "English" : "नेपाली"})
+            </span>
+            <div className="font-name bg-muted/50 rounded-lg border px-3 py-2 text-center text-base whitespace-pre-line">
               {preview}
             </div>
-            {count > 1 ? (
+            {first && isCustomized(first) ? (
+              <p className="text-muted-foreground text-xs">
+                This guest has custom text, so it prints as-is (line breaks kept)
+                regardless of language.
+              </p>
+            ) : count > 1 ? (
               <p className="text-muted-foreground text-xs">
                 Applies to all {count} selected guests (each with their own name).
               </p>

@@ -20,7 +20,6 @@ import {
   renameInvitationAction,
 } from "@/app/actions/invitations";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -86,10 +85,11 @@ export function InvitationCard({ invitation }: { invitation: InvitationCardData 
   }
 
   return (
-    <div className="group bg-card flex flex-col overflow-hidden rounded-xl border">
+    <div className="group bg-card ring-gold/25 shadow-sm shadow-foreground/[0.04] flex flex-col overflow-hidden rounded-xl ring-1 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md hover:ring-gold/40">
+      {/* The card image sits in an ivory mat with a thin gold keyline — a framed print. */}
       <Link
         href={`/dashboard/${invitation.id}`}
-        className="bg-muted relative flex aspect-[4/3] items-center justify-center overflow-hidden"
+        className="bg-muted ring-gold/25 relative m-3 mb-0 flex aspect-[4/3] items-center justify-center overflow-hidden rounded-lg ring-1"
       >
         {invitation.baseImagePublicId ? (
           // eslint-disable-next-line @next/next/no-img-element
@@ -98,7 +98,7 @@ export function InvitationCard({ invitation }: { invitation: InvitationCardData 
               width: 600,
             })}
             alt={invitation.title}
-            className="h-full w-full object-cover transition-transform group-hover:scale-[1.02]"
+            className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
             loading="lazy"
           />
         ) : (
@@ -110,7 +110,7 @@ export function InvitationCard({ invitation }: { invitation: InvitationCardData 
         <div className="flex items-start justify-between gap-2">
           <Link
             href={`/dashboard/${invitation.id}`}
-            className="font-heading line-clamp-2 font-medium hover:underline"
+            className="font-heading decoration-gold/50 line-clamp-2 text-[15px] leading-snug font-semibold underline-offset-4 hover:underline"
           >
             {invitation.title}
           </Link>
@@ -139,22 +139,24 @@ export function InvitationCard({ invitation }: { invitation: InvitationCardData 
           </DropdownMenu>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2">
-          {invitation.marked ? (
-            <Badge variant="outline">
-              <CheckCircle2 className="text-emerald-600" />
-              Marked
-            </Badge>
-          ) : (
-            <Badge variant="secondary">
-              <CircleDashed />
-              Not marked yet
-            </Badge>
-          )}
-          <span className="text-muted-foreground text-xs">
+        <div className="flex items-center justify-between gap-2">
+          <span className="eyebrow inline-flex items-center gap-1.5">
+            {invitation.marked ? (
+              <>
+                <CheckCircle2 className="size-3 text-emerald-600" />
+                Marked
+              </>
+            ) : (
+              <>
+                <CircleDashed className="text-muted-foreground/60 size-3" />
+                Not marked
+              </>
+            )}
+          </span>
+          <span className="text-muted-foreground/80 text-xs">
             {invitation.guestCount} guest{invitation.guestCount === 1 ? "" : "s"}
             {invitation.generatedCount > 0
-              ? ` · ${invitation.generatedCount} generated`
+              ? ` · ${invitation.generatedCount} done`
               : ""}
           </span>
         </div>

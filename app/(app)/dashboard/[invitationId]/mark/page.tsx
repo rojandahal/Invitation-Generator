@@ -45,13 +45,17 @@ export default async function MarkPage({
       <div>
         <Link
           href={`/dashboard/${invitation.id}`}
-          className="text-muted-foreground hover:text-foreground text-sm"
+          className="text-muted-foreground hover:text-foreground inline-flex items-center gap-1 text-sm"
         >
           ← {invitation.title}
         </Link>
-        <h1 className="font-heading mt-1 text-2xl font-semibold">
+        <h1 className="font-heading mt-2 text-3xl font-semibold tracking-tight">
           Mark the name spot
         </h1>
+        <p className="text-muted-foreground mt-1.5 text-sm">
+          Drag the box where each guest&apos;s name should sit, then set the
+          font, size, and alignment.
+        </p>
       </div>
       <MarkingEditor invitation={data} />
     </div>
