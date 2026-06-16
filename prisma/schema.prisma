@@ -1,0 +1,105 @@
+// Prisma schema for the Invitation Generator.
+// See IMPLEMENTATION.md §3 for the rationale behind this shape.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  USER
+}
+
+enum UserStatus {
+  ACTIVE
+  DISABLED
+}
+
+enum GuestStatus {
+  UNINVITED
+  GENERATED
+}
+
+model User {
+  id           String       @id @default(cuid())
+  email        String       @unique
+  passwordHash String
+  name         String?
+  role         Role         @default(USER)
+  status       UserStatus   @default(ACTIVE)
+  invitations  Invitation[]
+  people       Person[]
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+}
+
+model Invitation {
+  id                String            @id @default(cuid())
+  userId            String
+  user              User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title             String
+  baseImagePublicId String // Cloudinary public_id of the uploaded base asset
+  baseImageFormat   String  @default("png") // original format: png|jpg|pdf|... (drives PDF page-1 delivery)
+  baseImageWidth    Int
+  baseImageHeight   Int
+  // Text mark stored NORMALIZED (0..1) so it maps to any render resolution:
+  markX             Float             @default(0.2) // left, fraction of width
+  markY             Float             @default(0.44) // top, fraction of height
+  markWidth         Float             @default(0.6) // fraction of width
+  markHeight        Float             @default(0.12) // fraction of height
+  fontFamily        String            @default("NotoSansDevanagari") // Latin/English font key
+  fontFamilyNepali  String            @default("NotoSansDevanagari") // Devanagari/Nepali font key
+  fontSizeRel       Float             @default(0.04) // fraction of image HEIGHT
+  fontColor         String            @default("#000000")
+  fontWeight        Int               @default(600) // 100..900 (how bold)
+  fontItalic        Boolean           @default(false)
+  lineHeightRel     Float             @default(1.18) // line box as a multiple of font size (line gap)
+  align             String            @default("center") // left|center|right
+  valign            String            @default("middle") // top|middle|bottom
+  maxLines          Int               @default(2) // wrap the name into up to this many lines
+  namePrefix        String            @default("") // optional honorific BEFORE the name (e.g. श्री / Mr)
+  nameSuffix        String            @default("") // optional honorific AFTER the name (e.g. ज्यू)
+  marked            Boolean           @default(false) // has the mark been placed/saved at least once
+  guests            InvitationGuest[]
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+
+  @@index([userId])
+}
+
+model Person {
+  id          String            @id @default(cuid())
+  userId      String
+  user        User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  nameEnglish String
+  nameNepali  String?
+  salutation  String? // Mr | Mrs | Ms | ...
+  guestLinks  InvitationGuest[]
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+
+  @@index([userId])
+}
+
+model InvitationGuest {
+  id                String      @id @default(cuid())
+  invitationId      String
+  invitation        Invitation  @relation(fields: [invitationId], references: [id], onDelete: Cascade)
+  personId          String
+  person            Person      @relation(fields: [personId], references: [id], onDelete: Cascade)
+  invitationText    String // defaults to person's display name; override per invitation
+  status            GuestStatus @default(UNINVITED)
+  generatedPublicId String? // Cloudinary public_id of the generated image
+  generatedAt       DateTime?
+  createdAt         DateTime    @default(now())
+  updatedAt         DateTime    @updatedAt
+
+  @@unique([invitationId, personId])
+  @@index([invitationId])
+  @@index([personId])
+}
