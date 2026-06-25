@@ -157,6 +157,10 @@ function composeForGen(row: GuestRow, s: GenSettings): string {
   return [prefix, guestName(row, s.language), suffix].filter(Boolean).join(" ");
 }
 
+function guestFilenameBase(row: GuestRow): string {
+  return sanitizeFilename(row.nameEnglish.trim() || row.name);
+}
+
 export function InvitationDetail({
   invitation,
   guests,
@@ -311,7 +315,7 @@ export function InvitationDetail({
       async (row) => {
         const blob = await renderRowToBlob(image, composeForGen(row, settings));
         const uploaded = await uploadToCloudinary(blob, "generated", {
-          filename: `${sanitizeFilename(row.name)}.jpg`,
+          filename: `${guestFilenameBase(row)}.jpg`,
         });
         const res = await saveGeneratedAction({
           guestId: row.id,
@@ -381,7 +385,7 @@ export function InvitationDetail({
     try {
       const res = await fetch(generatedImageUrl(row.generatedPublicId));
       const blob = await res.blob();
-      downloadBlob(blob, `${sanitizeFilename(row.name)}.jpg`);
+      downloadBlob(blob, `${guestFilenameBase(row)}.jpg`);
     } catch {
       toast.error("Download failed.");
     }
@@ -402,7 +406,7 @@ export function InvitationDetail({
       async (row) => {
         const res = await fetch(generatedImageUrl(row.generatedPublicId!));
         const blob = await res.blob();
-        let name = sanitizeFilename(row.name);
+        let name = guestFilenameBase(row);
         const seen = used.get(name) ?? 0;
         used.set(name, seen + 1);
         if (seen > 0) name = `${name}_${seen + 1}`;
